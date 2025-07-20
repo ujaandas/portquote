@@ -39,6 +39,29 @@ func GetUserByUsername(db *sql.DB, username string) (*User, error) {
 	return u, nil
 }
 
+func GetUserBySession(db *sql.DB, session string) (*User, error) {
+	const q = `
+	SELECT id, username, password_hash, role, session
+		FROM users
+	 WHERE session = ?`
+	row := db.QueryRow(q, session)
+
+	u := &User{}
+	if err := row.Scan(
+		&u.ID,
+		&u.Username,
+		&u.PasswordHash,
+		&u.Role,
+		&u.Session,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return u, nil
+}
+
 func UpdateUserSession(db *sql.DB, userID int64, token string) error {
 	_, err := db.Exec(`
 			UPDATE users
