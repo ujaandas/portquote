@@ -25,6 +25,10 @@ func main() {
 		handlers.Login(db, w, r)
 	})
 
+	mux.HandleFunc("/dashboard", func(w http.ResponseWriter, r *http.Request) {
+		handlers.Dashboard(db, w, r)
+	})
+
 	addr := ":8080"
 	log.Printf("starting server on %s\n", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
