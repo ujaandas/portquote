@@ -2,14 +2,14 @@ CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username       TEXT    UNIQUE NOT NULL,
   password_hash  TEXT    NOT NULL,
-  role           TEXT CHECK( role IN ("user", "agent") )    NOT NULL
+  role           TEXT CHECK( role IN ('user', 'agent') ) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS ports (
   id   INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT    NOT NULL,
   country TEXT NOT NULL,
-  city TEXT NOT NULL,
+  city TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS quotations (

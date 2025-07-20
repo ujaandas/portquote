@@ -5,8 +5,11 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
+//go:embed schema.sql
 var schemaFS embed.FS
 
 func NewDB(path string) (*sql.DB, error) {
