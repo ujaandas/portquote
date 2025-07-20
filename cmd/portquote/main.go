@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	"portquote/internal/auth"
+	"portquote/internal/handlers"
 	"portquote/internal/store"
 )
 
@@ -22,7 +22,7 @@ func main() {
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	mux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		auth.Login(db, w, r)
+		handlers.Login(db, w, r)
 	})
 
 	addr := ":8080"
