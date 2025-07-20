@@ -1,7 +1,7 @@
 INSERT OR IGNORE INTO users (username, password_hash, role) VALUES
-  ('admin',  '$2a$10$7EqJtq98hPqEX7fNZaFWoO6phm0NfkgR9SNTZ4o0nhHbFq8rJZ6Nm', 'admin'),
-  ('agent1', '$2a$10$KbGkJDzhoI3um2yCMpQ/huXpr6sAQjFzsyqmZyBkvZjajkCpZg.3y', 'agent'),
-  ('agent2', '$2a$10$4DOjQTyjEh0oCe9ZyMw5nuSJ/6bUHivSdLXGzj5EtYPrQ/NEIzXZ6', 'agent');
+  ('admin',  '$2y$10$y4CUQzxBlt2yrTcQIz92BOBsRGhpvBXmZ8Tl4.B4no6tZiDXADBCW', 'admin'),
+  ('agent1', '$2y$10$y4CUQzxBlt2yrTcQIz92BOBsRGhpvBXmZ8Tl4.B4no6tZiDXADBCW', 'agent'),
+  ('agent2', '$2y$10$y4CUQzxBlt2yrTcQIz92BOBsRGhpvBXmZ8Tl4.B4no6tZiDXADBCW', 'agent');
 
 INSERT OR IGNORE INTO ports (name, country, city) VALUES
   ('Yangshan Deepwater Port', 'China', 'Shanghai'),
