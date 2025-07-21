@@ -1,23 +1,29 @@
-{{ define "title" }}Log In{{ end }}
+<!DOCTYPE html>
+<html lang="en">
 
-{{ define "content" }}
-<div id="login-form">
-  <form hx-post="/login" hx-target="#login-form" hx-swap="outerHTML" method="post">
-    <label>Username<br>
-      <input name="username" required>
-    </label><br>
-    <label>Password<br>
-      <input type="password" name="password" required>
-    </label><br>
-    <button type="submit">Log In</button>
-  </form>
+<head>
+  <meta charset="UTF-8">
+  <title>PortQuote - Log In</title>
+  <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+  <script src="https://unpkg.com/htmx.org/dist/ext/json-template.js"></script>
+</head>
 
-  {{ if .Error }}
-  <p style="color:red">{{ .Error }}</p>
-  {{ end }}
-</div>
-{{ end }}
+<body>
+  <div id="login-form">
+    <form hx-post="/login" hx-target="#login-form" hx-swap="outerHTML" method="post">
+      <label>Username<br>
+        <input name="username" required>
+      </label><br>
+      <label>Password<br>
+        <input type="password" name="password" required>
+      </label><br>
+      <button type="submit">Log In</button>
+    </form>
 
-{{ define "login" }}
-{{ template "layout" . }}
-{{ end }}
+    {{ if .Error }}
+    <p style="color:red">{{ .Error }}</p>
+    {{ end }}
+  </div>
+</body>
+
+</html>

@@ -1,14 +1,22 @@
-{{ define "title" }}Dashboard{{ end }}
+<!DOCTYPE html>
+<html lang="en">
 
-{{ define "content" }}
-<h1>Your Quotations</h1>
+<head>
+  <meta charset="UTF-8">
+  <title>PortQuote - Dashboard</title>
+  <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+  <script src="https://unpkg.com/htmx.org/dist/ext/json-template.js"></script>
+</head>
 
-<div id="dashboard" hx-get="/dashboard" hx-trigger="load" hx-target="#dashboard" hx-swap="outerHTML"
-  hx-ext="json-template" data-json-template="#dashboard-template">
-  <p>Loading your quotes…</p>
-</div>
+<body>
+  <h1>Your Quotations</h1>
 
-<script type="text/json-template" id="dashboard-template">{{`
+  <div id="dashboard" hx-get="/dashboard" hx-trigger="load" hx-target="#dashboard" hx-swap="outerHTML"
+    hx-ext="json-template" data-json-template="#dashboard-template">
+    <p>Loading your quotes…</p>
+  </div>
+
+  <script type="text/json-template" id="dashboard-template">{{`
     <table border="1" cellpadding="6" cellspacing="0">
       <thead>
         <tr>
@@ -32,8 +40,6 @@
       </tbody>
     </table>
   `}}</script>
-{{ end }}
+</body>
 
-{{ define "dashboard" }}
-{{ template "layout" . }}
-{{ end }}
+</html>

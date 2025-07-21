@@ -38,7 +38,7 @@ func Dashboard(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		}
 
 		if r.Header.Get("HX-Request") != "true" {
-			templates.DashT.ExecuteTemplate(w, "dashboard", nil)
+			templates.T.ExecuteTemplate(w, "dashboard.html", nil)
 			return
 		}
 

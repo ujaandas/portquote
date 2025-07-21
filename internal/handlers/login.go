@@ -16,7 +16,7 @@ func Login(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 
 	case http.MethodGet:
-		templates.LoginT.ExecuteTemplate(w, "login", nil)
+		templates.T.ExecuteTemplate(w, "login.html", nil)
 		return
 
 	case http.MethodPost:
@@ -24,7 +24,7 @@ func Login(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		user, err := store.GetUserByUsername(db, username)
 		if err != nil || user == nil || passwordInvalid(password, user.PasswordHash) {
 			w.WriteHeader(http.StatusUnauthorized)
-			templates.LoginT.ExecuteTemplate(w, "login", map[string]string{
+			templates.T.ExecuteTemplate(w, "login.html", map[string]string{
 				"Error": "Invalid username or password",
 			})
 			return
