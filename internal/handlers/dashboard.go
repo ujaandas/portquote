@@ -1,9 +1,7 @@
-// internal/handlers/dashboard.go
 package handlers
 
 import (
 	"database/sql"
-	"encoding/json"
 	"net/http"
 	"portquote/internal/store"
 	"portquote/web/templates"
@@ -45,33 +43,23 @@ func Dashboard(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if user.Role != "agent" {
-			json.NewEncoder(w).Encode([]DashboardRecord{})
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			templates.T.ExecuteTemplate(w, "dashboard_fragment.html", []DashboardRecord{})
 			return
 		}
 
-		quotes, err := store.GetQuotationsByAgent(db, int64(user.ID))
-		if err != nil {
-			http.Error(w, "server error", http.StatusInternalServerError)
-			return
-		}
-
-		var resp []DashboardRecord
+		quotes, _ := store.GetQuotationsByAgent(db, int64(user.ID))
+		var records []DashboardRecord
 		for _, qt := range quotes {
-			port, err := store.GetPortByID(db, qt.PortID)
-			if err != nil {
-				http.Error(w, "server error", http.StatusInternalServerError)
-				return
-			}
+			port, _ := store.GetPortByID(db, qt.PortID)
 			if port == nil {
 				continue
 			}
-			resp = append(resp, DashboardRecord{
-				Port:      *port,
-				Quotation: qt,
-			})
+			records = append(records, DashboardRecord{Port: *port, Quotation: qt})
 		}
 
-		json.NewEncoder(w).Encode(resp)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		templates.T.ExecuteTemplate(w, "dashboard_fragment.html", records)
 
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)

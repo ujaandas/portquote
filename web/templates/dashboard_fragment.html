@@ -1,0 +1,30 @@
+{{ define "dashboard_fragment.html" }}
+<table>
+  <thead>
+    <tr>
+      <th>Port Name</th>
+      <th>Port Code</th>
+      <th>Quotation ID</th>
+      <th>Rate</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{- if . }}
+    {{- range . }}
+    <tr>
+      <td>{{ .Port.Name }}</td>
+      <td>{{ .Port.Country }}</td>
+      <td>{{ .Quotation.ID }}</td>
+      <td>{{ .Quotation.Rate }}</td>
+      <td>{{ .Quotation.UpdatedAt.Format "2006-01-02" }}</td>
+    </tr>
+    {{- end }}
+    {{- else }}
+    <tr>
+      <td colspan="5">No quotes found.</td>
+    </tr>
+    {{- end }}
+  </tbody>
+</table>
+{{ end }}
