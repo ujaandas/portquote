@@ -1,4 +1,6 @@
-{{ define "body" }}
+{{ define "title" }}Log In{{ end }}
+
+{{ define "content" }}
 <div id="login-form">
   <form hx-post="/login" hx-target="#login-form" hx-swap="outerHTML" method="post">
     <label>Username<br>
@@ -14,4 +16,8 @@
   <p style="color:red">{{ .Error }}</p>
   {{ end }}
 </div>
+{{ end }}
+
+{{ define "login" }}
+{{ template "layout" . }}
 {{ end }}

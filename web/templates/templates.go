@@ -8,6 +8,10 @@ import (
 //go:embed *.html
 var FS embed.FS
 
-var T = template.Must(
+var LoginT = template.Must(
 	template.ParseFS(FS, "layout.html", "login.html"),
+)
+
+var DashT = template.Must(
+	template.ParseFS(FS, "layout.html", "dashboard.html"),
 )

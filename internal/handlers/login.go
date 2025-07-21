@@ -16,7 +16,7 @@ func Login(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 
 	case http.MethodGet:
-		templates.T.ExecuteTemplate(w, "layout.html", nil)
+		templates.LoginT.ExecuteTemplate(w, "login", nil)
 		return
 
 	case http.MethodPost:
@@ -24,7 +24,7 @@ func Login(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		user, err := store.GetUserByUsername(db, username)
 		if err != nil || user == nil || passwordInvalid(password, user.PasswordHash) {
 			w.WriteHeader(http.StatusUnauthorized)
-			templates.T.ExecuteTemplate(w, "layout.html", map[string]string{
+			templates.LoginT.ExecuteTemplate(w, "login", map[string]string{
 				"Error": "Invalid username or password",
 			})
 			return
@@ -59,6 +59,7 @@ func Login(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
 	}
 }
 

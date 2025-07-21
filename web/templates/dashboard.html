@@ -1,0 +1,39 @@
+{{ define "title" }}Dashboard{{ end }}
+
+{{ define "content" }}
+<h1>Your Quotations</h1>
+
+<div id="dashboard" hx-get="/dashboard" hx-trigger="load" hx-target="#dashboard" hx-swap="outerHTML"
+  hx-ext="json-template" data-json-template="#dashboard-template">
+  <p>Loading your quotes…</p>
+</div>
+
+<script type="text/json-template" id="dashboard-template">{{`
+    <table border="1" cellpadding="6" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Port Name</th>
+          <th>Port Code</th>
+          <th>Quotation ID</th>
+          <th>Rate</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#it}}
+          <tr>
+            <td>{{Port.Name}}</td>
+            <td>{{Port.Code}}</td>
+            <td>{{Quotation.ID}}</td>
+            <td>{{Quotation.Rate}}</td>
+            <td>{{Quotation.CreatedAt}}</td>
+          </tr>
+        {{/it}}
+      </tbody>
+    </table>
+  `}}</script>
+{{ end }}
+
+{{ define "dashboard" }}
+{{ template "layout" . }}
+{{ end }}
