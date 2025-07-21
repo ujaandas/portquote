@@ -21,6 +21,23 @@ type User struct {
 	Session      string
 }
 
+func GetUserByID(db *sql.DB, id int64) (*User, error) {
+	const q = `
+	SELECT id, username, password_hash, role, session
+		FROM users
+	 WHERE id = ?`
+	row := db.QueryRow(q, id)
+
+	u := &User{}
+	if err := row.Scan(&u.ID, &u.Username, &u.PasswordHash, &u.Role, &u.Session); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return u, nil
+}
+
 func GetUserByUsername(db *sql.DB, username string) (*User, error) {
 	const query = `
     SELECT id, username, password_hash, role, session

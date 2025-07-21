@@ -6,46 +6,60 @@ import (
 	"encoding/hex"
 	"net/http"
 	"portquote/internal/store"
+	"portquote/web/templates"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 func Login(db *sql.DB, w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "invalid req method", http.StatusMethodNotAllowed)
+	switch r.Method {
+
+	case http.MethodGet:
+		templates.T.ExecuteTemplate(w, "layout.html", nil)
 		return
+
+	case http.MethodPost:
+		username, password := r.FormValue("username"), r.FormValue("password")
+		user, err := store.GetUserByUsername(db, username)
+		if err != nil || user == nil || passwordInvalid(password, user.PasswordHash) {
+			w.WriteHeader(http.StatusUnauthorized)
+			templates.T.ExecuteTemplate(w, "layout.html", map[string]string{
+				"Error": "Invalid username or password",
+			})
+			return
+		}
+
+		token, err := generateToken(32)
+		if err != nil {
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
+		}
+		if err := store.UpdateUserSession(db, int64(user.ID), token); err != nil {
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
+		}
+
+		http.SetCookie(w, &http.Cookie{
+			Name:     "session_token",
+			Value:    token,
+			Expires:  time.Now().Add(24 * time.Hour),
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteStrictMode,
+			Path:     "/",
+		})
+
+		if r.Header.Get("HX-Request") == "true" {
+			w.Header().Set("HX-Redirect", "/dashboard")
+			return
+		}
+
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
-
-	username, password := r.FormValue("username"), r.FormValue("password")
-	user, err := store.GetUserByUsername(db, username)
-
-	if err != nil || user == nil || passwordInvalid(password, user.PasswordHash) {
-		http.Error(w, "invalid login", http.StatusUnauthorized)
-		return
-	}
-
-	token, err := generateToken(32)
-	if err != nil {
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
-
-	if err := store.UpdateUserSession(db, int64(user.ID), token); err != nil {
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    token,
-		Expires:  time.Now().Add(24 * time.Hour),
-		HttpOnly: true,
-		Path:     "/",
-	})
-
-	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
-
 }
 
 func passwordInvalid(pw, hash string) bool {
