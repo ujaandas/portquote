@@ -46,19 +46,43 @@ func GetQuotationsByAgent(db *sql.DB, agentID int64) ([]Quotation, error) {
 	return out, nil
 }
 
-func UpsertQuotation(db *sql.DB, q Quotation) error {
+func GetQuotationByID(db *sql.DB, id, agentID int64) (*Quotation, error) {
+	const q = `
+        SELECT id, agent_id, port_id, rate, valid_until, updated_at
+          FROM quotations
+         WHERE id = ? AND agent_id = ?`
+	row := db.QueryRow(q, id, agentID)
+
+	var qt Quotation
+	if err := row.Scan(
+		&qt.ID,
+		&qt.AgentID,
+		&qt.PortID,
+		&qt.Rate,
+		&qt.ValidUntil,
+		&qt.UpdatedAt,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &qt, nil
+}
+
+func UpdateQuotation(db *sql.DB, id, agentID int64, rate float64, validUntil string) error {
 	const stmt = `
-        INSERT INTO quotations (agent_id, port_id, rate, valid_until)
-        VALUES (?, ?, ?, ?)
-        ON CONFLICT(agent_id, port_id) DO UPDATE
-          SET rate        = excluded.rate,
-              valid_until = excluded.valid_until,
-              updated_at  = CURRENT_TIMESTAMP`
-	_, err := db.Exec(stmt,
-		q.AgentID,
-		q.PortID,
-		q.Rate,
-		q.ValidUntil,
-	)
+    UPDATE quotations
+       SET rate = ?, valid_until = ?, updated_at = CURRENT_TIMESTAMP
+     WHERE id = ? AND agent_id = ?`
+	_, err := db.Exec(stmt, rate, validUntil, id, agentID)
+	return err
+}
+
+func DeleteQuotation(db *sql.DB, id, agentID int64) error {
+	const stmt = `
+        DELETE FROM quotations
+         WHERE id = ? AND agent_id = ?`
+	_, err := db.Exec(stmt, id, agentID)
 	return err
 }

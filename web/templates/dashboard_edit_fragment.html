@@ -1,0 +1,21 @@
+{{ define "dashboard_edit_fragment.html" }}
+<tr id="quote-{{ .Quotation.ID }}">
+  <td>{{ .Port.Name }}</td>
+  <td>{{ .Port.Country }}</td>
+  <td>
+    <input name="rate" type="number" step="0.01" value="{{ printf " %.2f" .Quotation.Rate }}" />
+  </td>
+  <td>
+    <input name="valid_until" type="date" value="{{ .Quotation.ValidUntil }}" />
+  </td>
+  <td>
+    <button hx-put="/dashboard?id={{ .Quotation.ID }}" hx-include="tr#quote-{{ .Quotation.ID }} input"
+      hx-target="tr#quote-{{ .Quotation.ID }}" hx-swap="outerHTML">
+      Save
+    </button>
+    <button hx-delete="/dashboard?id={{ .Quotation.ID }}" hx-target="tr#quote-{{ .Quotation.ID }}" hx-swap="outerHTML">
+      Delete
+    </button>
+  </td>
+</tr>
+{{ end }}

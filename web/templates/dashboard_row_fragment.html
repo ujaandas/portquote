@@ -1,0 +1,14 @@
+{{ define "dashboard_row_fragment.html" }}
+<tr id="quote-{{ .Quotation.ID }}">
+  <td>{{ .Port.Name }}</td>
+  <td>{{ .Port.Country }}</td>
+  <td>{{ printf "%.2f" .Quotation.Rate }}</td>
+  <td>{{ .Quotation.ValidUntil }}</td>
+  <td>
+    <button hx-get="/dashboard/edit?id={{ .Quotation.ID }}" hx-target="tr#quote-{{ .Quotation.ID }}"
+      hx-swap="outerHTML">
+      Edit
+    </button>
+  </td>
+</tr>
+{{ end }}
