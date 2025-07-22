@@ -3,10 +3,11 @@
   <td>{{ .Port.Name }}</td>
   <td>{{ .Port.Country }}</td>
   <td>
-    <input name="rate" type="number" step="0.01" value="{{ printf " %.2f" .Quotation.Rate }}" />
+    <input name="rate" style="width: 100%;" type="number" step="0.01" value="{{ printf " %.2f" .Quotation.Rate }}" />
   </td>
   <td>
-    <input name="valid_until" type="date" value="{{ .Quotation.ValidUntil.Format " 2006-01-02" }}" />
+    <input name="valid_until" style="width: 100%;" type="date" value="{{ .Quotation.ValidUntil.Format " 2006-01-02"
+      }}" />
   </td>
   <td>
     <button hx-put="/agent/dashboard?id={{ .Quotation.ID }}" hx-include="tr#quote-{{ .Quotation.ID }} input"
