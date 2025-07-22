@@ -10,7 +10,7 @@ type Quotation struct {
 	AgentID    int64
 	PortID     int64
 	Rate       float64
-	ValidUntil string
+	ValidUntil time.Time
 	UpdatedAt  time.Time
 }
 

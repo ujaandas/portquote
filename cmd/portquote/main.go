@@ -25,12 +25,12 @@ func main() {
 		handlers.Login(db, w, r)
 	})
 
-	mux.HandleFunc("/dashboard", func(w http.ResponseWriter, r *http.Request) {
-		handlers.Dashboard(db, w, r)
+	mux.HandleFunc("/agent/dashboard", func(w http.ResponseWriter, r *http.Request) {
+		handlers.AgentDashboard(db, w, r)
 	})
 
-	mux.HandleFunc("/dashboard/edit", func(w http.ResponseWriter, r *http.Request) {
-		handlers.DashboardEdit(db, w, r)
+	mux.HandleFunc("/agent/dashboard/edit", func(w http.ResponseWriter, r *http.Request) {
+		handlers.AgentDashboardEdit(db, w, r)
 	})
 
 	addr := ":8080"

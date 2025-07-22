@@ -5,7 +5,7 @@
   <td>{{ printf "%.2f" .Quotation.Rate }}</td>
   <td>{{ .Quotation.ValidUntil }}</td>
   <td>
-    <button hx-get="/dashboard/edit?id={{ .Quotation.ID }}" hx-target="tr#quote-{{ .Quotation.ID }}"
+    <button hx-get="/agent/dashboard/edit?id={{ .Quotation.ID }}" hx-target="tr#quote-{{ .Quotation.ID }}"
       hx-swap="outerHTML">
       Edit
     </button>

@@ -51,11 +51,11 @@ func Login(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		})
 
 		if r.Header.Get("HX-Request") == "true" {
-			w.Header().Set("HX-Redirect", "/dashboard")
+			w.Header().Set("HX-Redirect", "/agent/dashboard")
 			return
 		}
 
-		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		http.Redirect(w, r, "/agent/dashboard", http.StatusSeeOther)
 
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
