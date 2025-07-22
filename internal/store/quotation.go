@@ -86,3 +86,36 @@ func DeleteQuotation(db *sql.DB, id, agentID int64) error {
 	_, err := db.Exec(stmt, id, agentID)
 	return err
 }
+
+func GetQuotationsByPort(db *sql.DB, portID int64) ([]Quotation, error) {
+	const q = `
+	SELECT id, agent_id, port_id, rate, valid_until, updated_at
+		FROM quotations
+	 WHERE port_id = ?
+	 ORDER BY rate ASC`
+	rows, err := db.Query(q, portID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []Quotation
+	for rows.Next() {
+		var qt Quotation
+		if err := rows.Scan(
+			&qt.ID,
+			&qt.AgentID,
+			&qt.PortID,
+			&qt.Rate,
+			&qt.ValidUntil,
+			&qt.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		out = append(out, qt)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return out, nil
+}

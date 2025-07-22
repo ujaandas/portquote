@@ -1,0 +1,26 @@
+{{ define "crew_dashboard_fragment.html" }}
+<table>
+  <thead>
+    <tr>
+      <th>Agent Name</th>
+      <th>Rate</th>
+      <th>Valid Until</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ if . }}
+    {{ range . }}
+    <tr>
+      <td>{{ .Agent.Username }}</td>
+      <td>{{ printf "%.2f" .Quotation.Rate }}</td>
+      <td>{{ .Quotation.ValidUntil }}</td>
+    </tr>
+    {{ end }}
+    {{ else }}
+    <tr>
+      <td colspan="3">No quotations available for this port.</td>
+    </tr>
+    {{ end }}
+  </tbody>
+</table>
+{{ end }}

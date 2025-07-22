@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"portquote/internal/store"
 	"portquote/web/templates"
@@ -51,11 +52,11 @@ func Login(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		})
 
 		if r.Header.Get("HX-Request") == "true" {
-			w.Header().Set("HX-Redirect", "/agent/dashboard")
+			w.Header().Set("HX-Redirect", fmt.Sprintf("/%s/dashboard", user.Role))
 			return
 		}
 
-		http.Redirect(w, r, "/agent/dashboard", http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("/%s/dashboard", user.Role), http.StatusSeeOther)
 
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)

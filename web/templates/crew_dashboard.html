@@ -1,0 +1,42 @@
+{{ define "crew_dashboard.html" }}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>PortQuote - Compare Agents</title>
+  <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 1em;
+    }
+
+    th,
+    td {
+      border: 1px solid #666;
+      padding: 0.5em;
+      text-align: left;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Choose Port &amp; Compare Quotations</h1>
+
+  <label for="port-select">Select Port:</label>
+  <select id="port-select" name="port_id" hx-get="/crew/dashboard" hx-target="#quote-table" hx-swap="innerHTML"
+    hx-trigger="change">
+    <option value="">- pick a port -</option>
+    {{ range .Ports }}
+    <option value="{{ .ID }}">{{ .Name }}</option>
+    {{ end }}
+  </select>
+
+  <div id="quote-table">
+  </div>
+</body>
+
+</html>
+{{ end }}

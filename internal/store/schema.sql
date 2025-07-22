@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username       TEXT    UNIQUE NOT NULL,
   password_hash  TEXT    NOT NULL,
-  role           TEXT CHECK( role IN ('user', 'agent', 'admin') ) NOT NULL,
+  role           TEXT CHECK( role IN ('crew', 'agent', 'admin') ) NOT NULL,
   session        TEXT DEFAULT ''
 );
 
@@ -19,9 +19,5 @@ CREATE TABLE IF NOT EXISTS quotations (
   port_id     INTEGER NOT NULL REFERENCES ports(id),
   rate        REAL    NOT NULL,
   valid_until DATE    NOT NULL,
-  updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(agent_id, port_id)
+  updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE UNIQUE INDEX IF NOT EXISTS agent_port
-  ON quotations(agent_id, port_id);

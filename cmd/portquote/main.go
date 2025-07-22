@@ -33,6 +33,10 @@ func main() {
 		handlers.AgentDashboardEdit(db, w, r)
 	})
 
+	mux.HandleFunc("/crew/dashboard", func(w http.ResponseWriter, r *http.Request) {
+		handlers.CrewDashboard(db, w, r)
+	})
+
 	addr := ":8080"
 	log.Printf("starting server on %s\n", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
