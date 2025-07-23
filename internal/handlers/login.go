@@ -6,23 +6,19 @@ import (
 	"fmt"
 	"net/http"
 	"portquote/internal/repository"
-	"portquote/internal/store"
 	"portquote/web/templates"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Login(db *store.Store, w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
+func LoginHandlerPOST(users *repository.UserRepo,
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 
-	case http.MethodGet:
-		templates.T.ExecuteTemplate(w, "login.html", nil)
-		return
-
-	case http.MethodPost:
 		username, password := r.FormValue("username"), r.FormValue("password")
-		user, err := repository.GetUserByUsername(db, username)
+		user, err := users.GetByUsername(ctx, username)
 		if err != nil || user == nil || passwordInvalid(password, user.PasswordHash) {
 			w.WriteHeader(http.StatusUnauthorized)
 			templates.T.ExecuteTemplate(w, "login.html", map[string]string{
@@ -36,7 +32,7 @@ func Login(db *store.Store, w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "server error", http.StatusInternalServerError)
 			return
 		}
-		if err := repository.UpdateUserSession(db, int64(user.ID), token); err != nil {
+		if err := users.UpdateSession(ctx, int64(user.ID), token); err != nil {
 			http.Error(w, "server error", http.StatusInternalServerError)
 			return
 		}
@@ -57,10 +53,12 @@ func Login(db *store.Store, w http.ResponseWriter, r *http.Request) {
 		}
 
 		http.Redirect(w, r, fmt.Sprintf("/%s/dashboard", user.Role), http.StatusSeeOther)
+	}
+}
 
-	default:
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
+func LoginHandlerGET() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		templates.T.ExecuteTemplate(w, "login.html", nil)
 	}
 }
 

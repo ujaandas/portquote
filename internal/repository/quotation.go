@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"portquote/internal/store"
 	"time"
@@ -15,12 +16,20 @@ type Quotation struct {
 	UpdatedAt  time.Time
 }
 
-func GetQuotationsByAgent(db *store.Store, agentID int64) ([]Quotation, error) {
+type QuotationRepo struct {
+	db *store.Store
+}
+
+func NewQuotationRepo(db *store.Store) *QuotationRepo {
+	return &QuotationRepo{db: db}
+}
+
+func (r *QuotationRepo) GetByAgent(ctx context.Context, agentID int64) ([]Quotation, error) {
 	const q = `
         SELECT id, agent_id, port_id, rate, valid_until, updated_at
           FROM quotations
          WHERE agent_id = ?`
-	rows, err := db.Query(q, agentID)
+	rows, err := r.db.QueryContext(ctx, q, agentID)
 	if err != nil {
 		return nil, err
 	}
@@ -47,12 +56,12 @@ func GetQuotationsByAgent(db *store.Store, agentID int64) ([]Quotation, error) {
 	return out, nil
 }
 
-func GetQuotationByID(db *store.Store, id, agentID int64) (*Quotation, error) {
+func (r *QuotationRepo) GetById(ctx context.Context, id, agentID int64) (*Quotation, error) {
 	const q = `
         SELECT id, agent_id, port_id, rate, valid_until, updated_at
           FROM quotations
          WHERE id = ? AND agent_id = ?`
-	row := db.QueryRow(q, id, agentID)
+	row := r.db.QueryRowContext(ctx, q, id, agentID)
 
 	var qt Quotation
 	if err := row.Scan(
@@ -71,30 +80,30 @@ func GetQuotationByID(db *store.Store, id, agentID int64) (*Quotation, error) {
 	return &qt, nil
 }
 
-func UpdateQuotation(db *store.Store, id, agentID int64, rate float64, validUntil string) error {
+func (r *QuotationRepo) UpdateById(ctx context.Context, id, agentID int64, rate float64, validUntil string) error {
 	const stmt = `
     UPDATE quotations
        SET rate = ?, valid_until = ?, updated_at = CURRENT_TIMESTAMP
      WHERE id = ? AND agent_id = ?`
-	_, err := db.Exec(stmt, rate, validUntil, id, agentID)
+	_, err := r.db.ExecContext(ctx, stmt, rate, validUntil, id, agentID)
 	return err
 }
 
-func DeleteQuotation(db *store.Store, id, agentID int64) error {
+func (r *QuotationRepo) DeleteById(ctx context.Context, id, agentID int64) error {
 	const stmt = `
         DELETE FROM quotations
          WHERE id = ? AND agent_id = ?`
-	_, err := db.Exec(stmt, id, agentID)
+	_, err := r.db.ExecContext(ctx, stmt, id, agentID)
 	return err
 }
 
-func GetQuotationsByPort(db *store.Store, portID int64) ([]Quotation, error) {
+func (r *QuotationRepo) GetByPort(ctx context.Context, portID int64) ([]Quotation, error) {
 	const q = `
 	SELECT id, agent_id, port_id, rate, valid_until, updated_at
 		FROM quotations
 	 WHERE port_id = ?
 	 ORDER BY rate ASC`
-	rows, err := db.Query(q, portID)
+	rows, err := r.db.QueryContext(ctx, q, portID)
 	if err != nil {
 		return nil, err
 	}

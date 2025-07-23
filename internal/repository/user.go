@@ -22,17 +22,20 @@ type User struct {
 	Role         UserRole
 	Session      string
 }
-
-type UserRepo interface {
-	GetByID(ctx context.Context, id int64) (*User, error)
+type UserRepo struct {
+	db *store.Store
 }
 
-func GetUserByID(db *store.Store, id int64) (*User, error) {
+func NewUserRepo(db *store.Store) *UserRepo {
+	return &UserRepo{db: db}
+}
+
+func (r *UserRepo) GetByID(ctx context.Context, id int64) (*User, error) {
 	const q = `
 	SELECT id, username, password_hash, role, session
 		FROM users
 	 WHERE id = ?`
-	row := db.QueryRow(q, id)
+	row := r.db.QueryRowContext(ctx, q, id)
 
 	u := &User{}
 	if err := row.Scan(&u.ID, &u.Username, &u.PasswordHash, &u.Role, &u.Session); err != nil {
@@ -44,7 +47,7 @@ func GetUserByID(db *store.Store, id int64) (*User, error) {
 	return u, nil
 }
 
-func GetUserByUsername(db *store.Store, username string) (*User, error) {
+func (r *UserRepo) GetByUsername(ctx context.Context, username string) (*User, error) {
 	const query = `
     SELECT id, username, password_hash, role, session
       FROM users
@@ -52,7 +55,7 @@ func GetUserByUsername(db *store.Store, username string) (*User, error) {
   `
 
 	u := &User{}
-	row := db.QueryRow(query, username)
+	row := r.db.QueryRow(query, username)
 	if err := row.Scan(&u.ID, &u.Username, &u.PasswordHash, &u.Role, &u.Session); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
@@ -62,12 +65,12 @@ func GetUserByUsername(db *store.Store, username string) (*User, error) {
 	return u, nil
 }
 
-func GetUserBySession(db *store.Store, session string) (*User, error) {
+func (r *UserRepo) GetBySession(ctx context.Context, session string) (*User, error) {
 	const q = `
 	SELECT id, username, password_hash, role, session
 		FROM users
 	 WHERE session = ?`
-	row := db.QueryRow(q, session)
+	row := r.db.QueryRow(q, session)
 
 	u := &User{}
 	if err := row.Scan(
@@ -85,8 +88,8 @@ func GetUserBySession(db *store.Store, session string) (*User, error) {
 	return u, nil
 }
 
-func UpdateUserSession(db *store.Store, userID int64, token string) error {
-	_, err := db.Exec(`
+func (r *UserRepo) UpdateSession(ctx context.Context, userID int64, token string) error {
+	_, err := r.db.Exec(`
 			UPDATE users
 			SET session = ?
 			WHERE id = ?`, token, userID)

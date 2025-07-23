@@ -1,32 +1,24 @@
 package server
 
 import (
+	"context"
 	"net/http"
-	"portquote/internal/store"
 )
-
-type DBHandlerFunc func(db *store.Store, w http.ResponseWriter, r *http.Request)
 
 type Router struct {
 	mux *http.ServeMux
-	db  *store.Store
+	ctx context.Context
 }
 
-func NewRouter(db *store.Store) *Router {
-	return &Router{
-		mux: http.NewServeMux(),
-		db:  db,
-	}
+func NewRouter(ctx context.Context) *Router {
+	return &Router{mux: http.NewServeMux(), ctx: ctx}
 }
 
-func (rt *Router) Handle(method, pattern string, handler DBHandlerFunc) {
-	rt.mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != method {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-		handler(rt.db, w, r)
-	})
+func (rt *Router) Handle(method, pattern string, handler http.Handler) {
+	route := method + " " + pattern
+	rt.mux.Handle(route, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler.ServeHTTP(w, r.WithContext(rt.ctx))
+	}))
 }
 
 func (rt *Router) Static(prefix, dir string) {

@@ -33,11 +33,11 @@ func NewDB(ctx context.Context, path string) (*Store, error) {
 
 	store := &Store{DB: db}
 
-	if err := runSQLFiles(ctx, store, "migrations"); err != nil {
+	if err := execSQL(ctx, store, "migrations"); err != nil {
 		store.Close()
 		return nil, fmt.Errorf("migrate: %w", err)
 	}
-	if err := runSQLFiles(ctx, store, "seeds"); err != nil {
+	if err := execSQL(ctx, store, "seeds"); err != nil {
 		store.Close()
 		return nil, fmt.Errorf("seed: %w", err)
 	}
@@ -45,7 +45,7 @@ func NewDB(ctx context.Context, path string) (*Store, error) {
 	return store, nil
 }
 
-func runSQLFiles(ctx context.Context, s *Store, subdir string) error {
+func execSQL(ctx context.Context, s *Store, subdir string) error {
 	entries, err := fs.ReadDir(sqlFS, subdir)
 	if err != nil {
 		return fmt.Errorf("read %s: %w", subdir, err)

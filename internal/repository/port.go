@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"portquote/internal/store"
 )
@@ -12,11 +13,19 @@ type Port struct {
 	City    string
 }
 
-func GetAllPorts(db *store.Store) ([]Port, error) {
+type PortRepo struct {
+	db *store.Store
+}
+
+func NewPortRepo(db *store.Store) *PortRepo {
+	return &PortRepo{db: db}
+}
+
+func (r *PortRepo) GetAll(ctx context.Context) ([]Port, error) {
 	const q = `
         SELECT id, name, country, city
           FROM ports`
-	rows, err := db.Query(q)
+	rows, err := r.db.QueryContext(ctx, q)
 	if err != nil {
 		return nil, err
 	}
@@ -41,12 +50,12 @@ func GetAllPorts(db *store.Store) ([]Port, error) {
 	return out, nil
 }
 
-func GetPortByID(db *store.Store, id int64) (*Port, error) {
+func (r *PortRepo) GetByID(ctx context.Context, id int64) (*Port, error) {
 	const q = `
         SELECT id, name, country, city
           FROM ports
          WHERE id = ?`
-	row := db.QueryRow(q, id)
+	row := r.db.QueryRowContext(ctx, q, id)
 
 	p := &Port{}
 	if err := row.Scan(
