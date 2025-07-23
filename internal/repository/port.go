@@ -1,7 +1,8 @@
-package store
+package repository
 
 import (
 	"database/sql"
+	"portquote/internal/store"
 )
 
 type Port struct {
@@ -11,7 +12,7 @@ type Port struct {
 	City    string
 }
 
-func GetAllPorts(db *sql.DB) ([]Port, error) {
+func GetAllPorts(db *store.Store) ([]Port, error) {
 	const q = `
         SELECT id, name, country, city
           FROM ports`
@@ -40,7 +41,7 @@ func GetAllPorts(db *sql.DB) ([]Port, error) {
 	return out, nil
 }
 
-func GetPortByID(db *sql.DB, id int64) (*Port, error) {
+func GetPortByID(db *store.Store, id int64) (*Port, error) {
 	const q = `
         SELECT id, name, country, city
           FROM ports

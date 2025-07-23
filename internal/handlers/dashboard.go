@@ -1,20 +1,20 @@
 package handlers
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
+	"portquote/internal/repository"
 	"portquote/internal/store"
 	"portquote/web/templates"
 	"strconv"
 )
 
 type DashboardRecord struct {
-	Port      store.Port
-	Quotation store.Quotation
+	Port      repository.Port
+	Quotation repository.Quotation
 }
 
-func AgentDashboard(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func AgentDashboard(db *store.Store, w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		if r.Header.Get("HX-Request") == "true" {
@@ -25,7 +25,7 @@ func AgentDashboard(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := store.GetUserBySession(db, cookie.Value)
+	user, err := repository.GetUserBySession(db, cookie.Value)
 	if err != nil || user == nil || user.Role != "agent" {
 		if r.Header.Get("HX-Request") == "true" {
 			w.Header().Set("HX-Redirect", "/login")
@@ -50,10 +50,10 @@ func AgentDashboard(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		quotes, _ := store.GetQuotationsByAgent(db, int64(user.ID))
+		quotes, _ := repository.GetQuotationsByAgent(db, int64(user.ID))
 		var records []DashboardRecord
 		for _, qt := range quotes {
-			port, _ := store.GetPortByID(db, qt.PortID)
+			port, _ := repository.GetPortByID(db, qt.PortID)
 			if port == nil {
 				continue
 			}
@@ -67,13 +67,13 @@ func AgentDashboard(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		id, _ := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
 		rate, _ := strconv.ParseFloat(r.FormValue("rate"), 64)
 		valid := r.FormValue("valid_until")
-		if err := store.UpdateQuotation(db, id, int64(user.ID), rate, valid); err != nil {
+		if err := repository.UpdateQuotation(db, id, int64(user.ID), rate, valid); err != nil {
 			http.Error(w, "failed to update", http.StatusInternalServerError)
 			return
 		}
 
-		qt, _ := store.GetQuotationByID(db, id, int64(user.ID))
-		port, _ := store.GetPortByID(db, qt.PortID)
+		qt, _ := repository.GetQuotationByID(db, id, int64(user.ID))
+		port, _ := repository.GetPortByID(db, qt.PortID)
 		rec := DashboardRecord{Port: *port, Quotation: *qt}
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -81,7 +81,7 @@ func AgentDashboard(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 	case http.MethodDelete:
 		id, _ := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
-		if err := store.DeleteQuotation(db, id, int64(user.ID)); err != nil {
+		if err := repository.DeleteQuotation(db, id, int64(user.ID)); err != nil {
 			http.Error(w, "failed to delete", http.StatusInternalServerError)
 			return
 		}
@@ -93,7 +93,7 @@ func AgentDashboard(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 }
 
-func AgentDashboardEdit(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func AgentDashboardEdit(db *store.Store, w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		if r.Header.Get("HX-Request") == "true" {
@@ -104,7 +104,7 @@ func AgentDashboardEdit(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := store.GetUserBySession(db, cookie.Value)
+	user, err := repository.GetUserBySession(db, cookie.Value)
 	if err != nil || user == nil || user.Role != "agent" {
 		if r.Header.Get("HX-Request") == "true" {
 			w.Header().Set("HX-Redirect", "/login")
@@ -120,12 +120,12 @@ func AgentDashboardEdit(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	}
 
 	id, _ := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
-	qt, err := store.GetQuotationByID(db, id, int64(user.ID))
+	qt, err := repository.GetQuotationByID(db, id, int64(user.ID))
 	if err != nil || qt == nil {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
-	port, _ := store.GetPortByID(db, qt.PortID)
+	port, _ := repository.GetPortByID(db, qt.PortID)
 
 	rec := DashboardRecord{Port: *port, Quotation: *qt}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -133,11 +133,11 @@ func AgentDashboardEdit(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 type CrewDashboardRecord struct {
-	Agent     store.User
-	Quotation store.Quotation
+	Agent     repository.User
+	Quotation repository.Quotation
 }
 
-func CrewDashboard(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func CrewDashboard(db *store.Store, w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		if r.Header.Get("HX-Request") == "true" {
@@ -147,7 +147,7 @@ func CrewDashboard(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-	user, err := store.GetUserBySession(db, cookie.Value)
+	user, err := repository.GetUserBySession(db, cookie.Value)
 	if err != nil || user == nil || user.Role != "crew" {
 		if r.Header.Get("HX-Request") == "true" {
 			w.Header().Set("HX-Redirect", "/login")
@@ -160,10 +160,10 @@ func CrewDashboard(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		if r.Header.Get("HX-Request") != "true" {
-			ports, _ := store.GetAllPorts(db)
+			ports, _ := repository.GetAllPorts(db)
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			templates.T.ExecuteTemplate(w, "crew_dashboard.html", struct {
-				Ports []store.Port
+				Ports []repository.Port
 			}{
 				Ports: ports,
 			})
@@ -171,10 +171,10 @@ func CrewDashboard(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		}
 
 		pid, _ := strconv.ParseInt(r.URL.Query().Get("port_id"), 10, 64)
-		quotes, _ := store.GetQuotationsByPort(db, pid)
+		quotes, _ := repository.GetQuotationsByPort(db, pid)
 		var rows []CrewDashboardRecord
 		for _, qt := range quotes {
-			agent, _ := store.GetUserByID(db, qt.AgentID)
+			agent, _ := repository.GetUserByID(db, qt.AgentID)
 			if agent == nil {
 				continue
 			}

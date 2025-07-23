@@ -1,7 +1,8 @@
-package store
+package repository
 
 import (
 	"database/sql"
+	"portquote/internal/store"
 	"time"
 )
 
@@ -14,7 +15,7 @@ type Quotation struct {
 	UpdatedAt  time.Time
 }
 
-func GetQuotationsByAgent(db *sql.DB, agentID int64) ([]Quotation, error) {
+func GetQuotationsByAgent(db *store.Store, agentID int64) ([]Quotation, error) {
 	const q = `
         SELECT id, agent_id, port_id, rate, valid_until, updated_at
           FROM quotations
@@ -46,7 +47,7 @@ func GetQuotationsByAgent(db *sql.DB, agentID int64) ([]Quotation, error) {
 	return out, nil
 }
 
-func GetQuotationByID(db *sql.DB, id, agentID int64) (*Quotation, error) {
+func GetQuotationByID(db *store.Store, id, agentID int64) (*Quotation, error) {
 	const q = `
         SELECT id, agent_id, port_id, rate, valid_until, updated_at
           FROM quotations
@@ -70,7 +71,7 @@ func GetQuotationByID(db *sql.DB, id, agentID int64) (*Quotation, error) {
 	return &qt, nil
 }
 
-func UpdateQuotation(db *sql.DB, id, agentID int64, rate float64, validUntil string) error {
+func UpdateQuotation(db *store.Store, id, agentID int64, rate float64, validUntil string) error {
 	const stmt = `
     UPDATE quotations
        SET rate = ?, valid_until = ?, updated_at = CURRENT_TIMESTAMP
@@ -79,7 +80,7 @@ func UpdateQuotation(db *sql.DB, id, agentID int64, rate float64, validUntil str
 	return err
 }
 
-func DeleteQuotation(db *sql.DB, id, agentID int64) error {
+func DeleteQuotation(db *store.Store, id, agentID int64) error {
 	const stmt = `
         DELETE FROM quotations
          WHERE id = ? AND agent_id = ?`
@@ -87,7 +88,7 @@ func DeleteQuotation(db *sql.DB, id, agentID int64) error {
 	return err
 }
 
-func GetQuotationsByPort(db *sql.DB, portID int64) ([]Quotation, error) {
+func GetQuotationsByPort(db *store.Store, portID int64) ([]Quotation, error) {
 	const q = `
 	SELECT id, agent_id, port_id, rate, valid_until, updated_at
 		FROM quotations

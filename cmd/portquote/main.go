@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -10,8 +11,10 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
+
 	dbPath := filepath.Join("internal", "store", "portquote.db")
-	db, err := store.NewDB(dbPath)
+	db, err := store.NewDB(ctx, dbPath)
 	if err != nil {
 		log.Fatalf("failed to setup db: %v", err)
 	}

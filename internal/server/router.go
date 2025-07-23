@@ -1,18 +1,18 @@
 package server
 
 import (
-	"database/sql"
 	"net/http"
+	"portquote/internal/store"
 )
 
-type DBHandlerFunc func(db *sql.DB, w http.ResponseWriter, r *http.Request)
+type DBHandlerFunc func(db *store.Store, w http.ResponseWriter, r *http.Request)
 
 type Router struct {
 	mux *http.ServeMux
-	db  *sql.DB
+	db  *store.Store
 }
 
-func NewRouter(db *sql.DB) *Router {
+func NewRouter(db *store.Store) *Router {
 	return &Router{
 		mux: http.NewServeMux(),
 		db:  db,

@@ -1,8 +1,10 @@
-package store
+package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
+	"portquote/internal/store"
 )
 
 type UserRole string
@@ -21,7 +23,11 @@ type User struct {
 	Session      string
 }
 
-func GetUserByID(db *sql.DB, id int64) (*User, error) {
+type UserRepo interface {
+	GetByID(ctx context.Context, id int64) (*User, error)
+}
+
+func GetUserByID(db *store.Store, id int64) (*User, error) {
 	const q = `
 	SELECT id, username, password_hash, role, session
 		FROM users
@@ -38,7 +44,7 @@ func GetUserByID(db *sql.DB, id int64) (*User, error) {
 	return u, nil
 }
 
-func GetUserByUsername(db *sql.DB, username string) (*User, error) {
+func GetUserByUsername(db *store.Store, username string) (*User, error) {
 	const query = `
     SELECT id, username, password_hash, role, session
       FROM users
@@ -56,7 +62,7 @@ func GetUserByUsername(db *sql.DB, username string) (*User, error) {
 	return u, nil
 }
 
-func GetUserBySession(db *sql.DB, session string) (*User, error) {
+func GetUserBySession(db *store.Store, session string) (*User, error) {
 	const q = `
 	SELECT id, username, password_hash, role, session
 		FROM users
@@ -79,7 +85,7 @@ func GetUserBySession(db *sql.DB, session string) (*User, error) {
 	return u, nil
 }
 
-func UpdateUserSession(db *sql.DB, userID int64, token string) error {
+func UpdateUserSession(db *store.Store, userID int64, token string) error {
 	_, err := db.Exec(`
 			UPDATE users
 			SET session = ?

@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"crypto/rand"
-	"database/sql"
 	"encoding/hex"
 	"fmt"
 	"net/http"
+	"portquote/internal/repository"
 	"portquote/internal/store"
 	"portquote/web/templates"
 	"time"
@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Login(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func Login(db *store.Store, w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 
 	case http.MethodGet:
@@ -22,7 +22,7 @@ func Login(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 	case http.MethodPost:
 		username, password := r.FormValue("username"), r.FormValue("password")
-		user, err := store.GetUserByUsername(db, username)
+		user, err := repository.GetUserByUsername(db, username)
 		if err != nil || user == nil || passwordInvalid(password, user.PasswordHash) {
 			w.WriteHeader(http.StatusUnauthorized)
 			templates.T.ExecuteTemplate(w, "login.html", map[string]string{
@@ -36,7 +36,7 @@ func Login(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "server error", http.StatusInternalServerError)
 			return
 		}
-		if err := store.UpdateUserSession(db, int64(user.ID), token); err != nil {
+		if err := repository.UpdateUserSession(db, int64(user.ID), token); err != nil {
 			http.Error(w, "server error", http.StatusInternalServerError)
 			return
 		}

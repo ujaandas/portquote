@@ -1,25 +1,29 @@
 package store
 
 import (
+	"context"
 	"database/sql"
 	"embed"
 	"fmt"
 	"io/fs"
-	"log"
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-//go:embed schema.sql
-var schemaFS embed.FS
+//go:embed migrations/*.sql
+//go:embed seeds/*.sql
+var sqlFS embed.FS
 
-//go:embed seed.sql
-var seedFS embed.FS
+type Store struct {
+	*sql.DB
+}
 
-func NewDB(path string) (*sql.DB, error) {
-	if err := os.Remove(path); err != nil {
-		log.Fatalf("remove database file '%s': %v\n", path, err)
+func NewDB(ctx context.Context, path string) (*Store, error) {
+	if path != ":memory:" {
+		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+			return nil, fmt.Errorf("remove database file %q: %w", path, err)
+		}
 	}
 
 	db, err := sql.Open("sqlite3", path+"?_foreign_keys=1")
@@ -27,42 +31,37 @@ func NewDB(path string) (*sql.DB, error) {
 		return nil, fmt.Errorf("open sqlite3: %w", err)
 	}
 
-	if err := migrate(db); err != nil {
-		db.Close()
+	store := &Store{DB: db}
+
+	if err := runSQLFiles(ctx, store, "migrations"); err != nil {
+		store.Close()
 		return nil, fmt.Errorf("migrate: %w", err)
 	}
-
-	if err := seed(db); err != nil {
-		db.Close()
+	if err := runSQLFiles(ctx, store, "seeds"); err != nil {
+		store.Close()
 		return nil, fmt.Errorf("seed: %w", err)
 	}
 
-	return db, nil
+	return store, nil
 }
 
-func migrate(db *sql.DB) error {
-	data, err := fs.ReadFile(schemaFS, "schema.sql")
-
+func runSQLFiles(ctx context.Context, s *Store, subdir string) error {
+	entries, err := fs.ReadDir(sqlFS, subdir)
 	if err != nil {
-		return fmt.Errorf("read schema.sql: %w", err)
+		return fmt.Errorf("read %s: %w", subdir, err)
 	}
 
-	if _, err := db.Exec(string(data)); err != nil {
-		return fmt.Errorf("exec schema: %w", err)
+	for _, entry := range entries {
+		if entry.IsDir() || !fs.ValidPath(entry.Name()) {
+			continue
+		}
+		sqlBytes, err := sqlFS.ReadFile(fmt.Sprintf("%s/%s", subdir, entry.Name()))
+		if err != nil {
+			return fmt.Errorf("read %s/%s: %w", subdir, entry.Name(), err)
+		}
+		if _, err := s.ExecContext(ctx, string(sqlBytes)); err != nil {
+			return fmt.Errorf("exec %s/%s: %w", subdir, entry.Name(), err)
+		}
 	}
-
-	return nil
-}
-
-func seed(db *sql.DB) error {
-	data, err := fs.ReadFile(seedFS, "seed.sql")
-	if err != nil {
-		return fmt.Errorf("read seed.sql: %w", err)
-	}
-
-	if _, err := db.Exec(string(data)); err != nil {
-		return fmt.Errorf("exec seed.sql: %w", err)
-	}
-
 	return nil
 }
