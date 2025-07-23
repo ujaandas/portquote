@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"portquote/internal/repository"
+	"portquote/internal/server"
 	"portquote/web/templates"
 	"time"
 
@@ -58,6 +59,9 @@ func LoginPOST(users *repository.UserRepo,
 
 func LoginGET() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if user := server.CurrentUser(r.Context()); user != nil {
+			http.Redirect(w, r, fmt.Sprintf("/%s/dashboard", user.Role), http.StatusSeeOther)
+		}
 		templates.T.ExecuteTemplate(w, "login.html", nil)
 	}
 }
