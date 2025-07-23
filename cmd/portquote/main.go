@@ -27,13 +27,16 @@ func main() {
 
 	router := server.NewRouter(baseCtx)
 
+	router.Use(server.SessionMiddleware(userRepo))
+	router.Use(server.LoggingMiddleware)
+
 	router.Static("/static/", "web/static")
 
-	router.Handle(http.MethodGet, "/login", handlers.LoginHandlerGET())
-	router.Handle(http.MethodPost, "/login", handlers.LoginHandlerPOST(userRepo))
-	router.Handle(http.MethodGet, "/agent/dashboard", handlers.AgentDashboard(userRepo, portRepo, quoteRepo))
-	router.Handle(http.MethodPost, "/agent/dashboard/edit", handlers.AgentDashboardEdit(userRepo, portRepo, quoteRepo))
-	router.Handle(http.MethodGet, "/crew/dashboard", handlers.CrewDashboard(userRepo, portRepo, quoteRepo))
+	router.Handle(http.MethodGet, "/login", handlers.LoginGET())
+	router.Handle(http.MethodPost, "/login", handlers.LoginPOST(userRepo))
+	router.Handle(http.MethodGet, "/agent/dashboard", handlers.AgentDashboard(userRepo, portRepo, quoteRepo), "agent", "admin")
+	router.Handle(http.MethodPost, "/agent/dashboard/edit", handlers.AgentDashboardEdit(userRepo, portRepo, quoteRepo), "agent", "admin")
+	router.Handle(http.MethodGet, "/crew/dashboard", handlers.CrewDashboard(userRepo, portRepo, quoteRepo), "crew", "admin")
 
 	addr := ":8080"
 	log.Printf("starting server on %s\n", addr)

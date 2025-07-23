@@ -12,7 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func LoginHandlerPOST(users *repository.UserRepo,
+func LoginPOST(users *repository.UserRepo,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -56,7 +56,7 @@ func LoginHandlerPOST(users *repository.UserRepo,
 	}
 }
 
-func LoginHandlerGET() http.HandlerFunc {
+func LoginGET() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		templates.T.ExecuteTemplate(w, "login.html", nil)
 	}

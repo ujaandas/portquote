@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"portquote/internal/repository"
+	"portquote/internal/server"
 	"portquote/web/templates"
 	"strconv"
 )
@@ -16,25 +17,7 @@ type DashboardRecord struct {
 func AgentDashboard(users *repository.UserRepo, ports *repository.PortRepo, quotations *repository.QuotationRepo) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		cookie, err := r.Cookie("session_token")
-		if err != nil {
-			if r.Header.Get("HX-Request") == "true" {
-				w.Header().Set("HX-Redirect", "/login")
-				return
-			}
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-
-		user, err := users.GetBySession(ctx, cookie.Value)
-		if err != nil || user == nil || user.Role != "agent" {
-			if r.Header.Get("HX-Request") == "true" {
-				w.Header().Set("HX-Redirect", "/login")
-				return
-			}
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
+		user := server.CurrentUser(ctx)
 
 		switch r.Method {
 		case http.MethodGet:
