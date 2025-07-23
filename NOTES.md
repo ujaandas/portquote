@@ -1,0 +1,7 @@
+- unique across agent/port, if try to add dup, prompt to update instead
+- instead of inline edit, use form like on email
+- crew view, choose # of sign on, sign off
+- calc based on sign on/sign off
+- agent can add max 3 sections (misc/incidental one time + misc/incidental per crew per signon/off)
+- crew input sign on, sign off
+- crew can select country

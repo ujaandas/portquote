@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"portquote/internal/handlers"
+	"portquote/internal/server"
 	"portquote/internal/store"
 )
 
@@ -16,30 +17,18 @@ func main() {
 	}
 	defer db.Close()
 
-	mux := http.NewServeMux()
+	router := server.NewRouter(db)
 
-	fs := http.FileServer(http.Dir("web/static"))
-	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+	router.Static("/static/", "web/static")
 
-	mux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		handlers.Login(db, w, r)
-	})
-
-	mux.HandleFunc("/agent/dashboard", func(w http.ResponseWriter, r *http.Request) {
-		handlers.AgentDashboard(db, w, r)
-	})
-
-	mux.HandleFunc("/agent/dashboard/edit", func(w http.ResponseWriter, r *http.Request) {
-		handlers.AgentDashboardEdit(db, w, r)
-	})
-
-	mux.HandleFunc("/crew/dashboard", func(w http.ResponseWriter, r *http.Request) {
-		handlers.CrewDashboard(db, w, r)
-	})
+	router.Handle(http.MethodGet, "/login", handlers.Login)
+	router.Handle(http.MethodGet, "/agent/dashboard", handlers.AgentDashboard)
+	router.Handle(http.MethodPost, "/agent/dashboard/edit", handlers.AgentDashboardEdit)
+	router.Handle(http.MethodGet, "/crew/dashboard", handlers.CrewDashboard)
 
 	addr := ":8080"
 	log.Printf("starting server on %s\n", addr)
-	if err := http.ListenAndServe(addr, mux); err != nil {
+	if err := http.ListenAndServe(addr, router); err != nil {
 		log.Fatalf("server failed: %v", err)
 	}
 }
