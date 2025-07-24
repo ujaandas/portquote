@@ -40,9 +40,14 @@ func main() {
 
 	router.Handle(http.MethodGet, "/login", handlers.LoginGET())
 	router.Handle(http.MethodPost, "/login", handlers.LoginPOST(userRepo))
-	router.Handle(http.MethodGet, "/agent/dashboard", handlers.AgentDashboard(userRepo, portRepo, quoteRepo), "agent", "admin")
-	router.Handle(http.MethodPost, "/agent/dashboard/edit", handlers.AgentDashboardEdit(userRepo, portRepo, quoteRepo), "agent", "admin")
-	router.Handle(http.MethodGet, "/crew/dashboard", handlers.CrewDashboard(userRepo, portRepo, quoteRepo), "crew", "admin")
+
+	router.Handle(http.MethodGet, "/agent/dashboard", handlers.AgentDashboardGET(portRepo, quoteRepo), "agent", "admin")
+	router.Handle(http.MethodPut, "/agent/dashboard", handlers.AgentDashboardPUT(portRepo, quoteRepo), "agent", "admin")
+	router.Handle(http.MethodDelete, "/agent/dashboard", handlers.AgentDashboardDELETE(portRepo, quoteRepo), "agent", "admin")
+
+	router.Handle(http.MethodGet, "/agent/dashboard/edit", handlers.AgentDashboardEditGET(userRepo, portRepo, quoteRepo), "agent", "admin")
+
+	router.Handle(http.MethodGet, "/crew/dashboard", handlers.CrewDashboardGET(userRepo, portRepo, quoteRepo), "crew", "admin")
 	l.Info("Other routes registered")
 
 	addr := ":8080"
